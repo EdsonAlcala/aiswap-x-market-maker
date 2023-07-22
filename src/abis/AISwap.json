@@ -1,0 +1,394 @@
+[
+    {
+        "inputs": [],
+        "name": "AuctionDoesNotExist",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "AuctionIsNotClaimed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "AuctionIsNotExpired",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "AuctionIsNotOpen",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "AuctionPeriodPassed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ChallengePeriodInProgress",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "InvalidClaimer",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "OnlyAuctionOwner",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "auctionId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "claimingTime",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "claimer",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum AISwap.AuctionStatus",
+                "name": "auctionStatus",
+                "type": "uint8"
+            }
+        ],
+        "name": "AuctionClaimed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "auctionId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "tokenInputAddress",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "tokenOutputAddress",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "tokenInputAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "minimumTokenOutputAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "creationTime",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "sourceChain",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "destinationChain",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum AISwap.AuctionStatus",
+                "name": "auctionStatus",
+                "type": "uint8"
+            }
+        ],
+        "name": "AuctionCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "auctionId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum AISwap.AuctionStatus",
+                "name": "auctionStatus",
+                "type": "uint8"
+            }
+        ],
+        "name": "AuctionFundsClaimed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "auctionId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum AISwap.AuctionStatus",
+                "name": "auctionStatus",
+                "type": "uint8"
+            }
+        ],
+        "name": "AuctionSettled",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "AUCTION_PERIOD",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "CHALLENGE_PERIOD",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "auctionCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "auctionExists",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "auctions",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "auctionId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "tokenInputAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "tokenOutputAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tokenInputAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "minimumTokenOutputAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "creationTime",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "claimingTime",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "claimer",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "sourceChain",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "destinationChain",
+                "type": "uint256"
+            },
+            {
+                "internalType": "enum AISwap.AuctionStatus",
+                "name": "auctionStatus",
+                "type": "uint8"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_auctionId",
+                "type": "uint256"
+            }
+        ],
+        "name": "claimAuction",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "tokenInputAddress",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "tokenOutputAddress",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "tokenInputAmount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "minimumTokenOutputAmount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "sourceChain",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "destinationChain",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct AISwap.AuctionOrder",
+                "name": "_order",
+                "type": "tuple"
+            }
+        ],
+        "name": "createAuction",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_auctionId",
+                "type": "uint256"
+            }
+        ],
+        "name": "reclaimAuctionFunds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_auctionId",
+                "type": "uint256"
+            }
+        ],
+        "name": "settleAuction",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]
