@@ -1,0 +1,20 @@
+version: '3'
+services:
+  arbitrum:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.arbitrum
+  linea:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      env_file:
+        - .env.linea
+  gnosis:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      env_file:
+        - .env.gnosis

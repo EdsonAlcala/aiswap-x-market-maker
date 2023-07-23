@@ -4,24 +4,8 @@ import { ethers, NonceManager } from 'ethers';
 import AISwapABI from './abis/AISwap.json';
 import ERC20ABI from './abis/ERC20.json';
 
-const WEB_SOCKET_PROVIDER_URL = process.env.WEB_SOCKET_PROVIDER_URL || "";
-
-if (!WEB_SOCKET_PROVIDER_URL) {
-    throw new Error("WEB_SOCKET_PROVIDER_URL is not set")
-}
-
-const JSON_RPC_PROVIDER_URL = process.env.JSON_RPC_PROVIDER_URL || "";
-
-if (!JSON_RPC_PROVIDER_URL) {
-    throw new Error("JSON_RPC_PROVIDER_URL is not set")
-}
-
-const DESTINATION_CHAIN_JSON_RPC_PROVIDER_URL = process.env.DESTINATION_CHAIN_JSON_RPC_PROVIDER_URL || "";
-
-if (!DESTINATION_CHAIN_JSON_RPC_PROVIDER_URL) {
-    throw new Error("DESTINATION_CHAIN_JSON_RPC_PROVIDER_URL is not set")
-}
-
+// @dev We only need 1 websocket and the rest are JSON RPCs to trigger txs
+// COMMON
 const MNEMONIC = process.env.MNEMONIC || "";
 
 if (!MNEMONIC) {
@@ -34,22 +18,75 @@ if (!AISWAP_ADDRESS) {
     throw new Error("AISWAP_ADDRESS is not set")
 }
 
-const web3SockerProvider = new ethers.WebSocketProvider(WEB_SOCKET_PROVIDER_URL);
-const jsonRPCProvider = new ethers.JsonRpcProvider(JSON_RPC_PROVIDER_URL);
-const destinationChainJsonRpcProvider = new ethers.JsonRpcProvider(DESTINATION_CHAIN_JSON_RPC_PROVIDER_URL);
+// ARBITRUM
+const ARBITRUM_JSON_RPC = process.env.ARBITRUM_JSON_RPC || "";
+
+if (!ARBITRUM_JSON_RPC) {
+    throw new Error("ARBITRUM_JSON_RPC is not set")
+}
+
+// GNOSIS
+const GNOSIS_JSON_RPC = process.env.GNOSIS_JSON_RPC || "";
+
+if (!GNOSIS_JSON_RPC) {
+    throw new Error("GNOSIS_JSON_RPC is not set")
+}
+
+// LINEA
+const LINEA_JSON_RPC = process.env.LINEA_JSON_RPC || "";
+
+if (!LINEA_JSON_RPC) {
+    throw new Error("LINEA_JSON_RPC is not set")
+}
+
+// WEBSOCKET
+const WEBSOCKET_FOR_NODE = process.env.WEBSOCKET_FOR_NODE || "";
+
+const web3SockerProvider = new ethers.WebSocketProvider(WEBSOCKET_FOR_NODE);
+
+// CHAIN ID
+const CHAIN_ID = process.env.CHAIN_ID || "";
+
+if (!CHAIN_ID) {
+    throw new Error("CHAIN_ID is not set")
+}
+
+// Configure all JSON RPCs
+const arbitrumJSONRPCProvider = new ethers.JsonRpcProvider(ARBITRUM_JSON_RPC);
+const gnosisJSONRPCProvider = new ethers.JsonRpcProvider(GNOSIS_JSON_RPC);
+const lineaJSONRPCProvider = new ethers.JsonRpcProvider(LINEA_JSON_RPC);
 
 const getUserSigner = (providerValue: any) => {
-    const hdNode = ethers.HDNodeWallet.fromMnemonic(ethers.Mnemonic.fromPhrase(MNEMONIC || ""), `m/44'/60'/0'/0/1`);
+    const hdNode = ethers.HDNodeWallet.fromMnemonic(ethers.Mnemonic.fromPhrase(MNEMONIC || ""), `m/44'/60'/0'/0/0`);
     const wallet = new ethers.Wallet(hdNode.privateKey, providerValue);
     console.log('Wallet Address:', wallet.address);
     const nonceManager = new NonceManager(wallet);
     return nonceManager.signer
 }
 
-const main = async () => {
-    const userSigner = getUserSigner(jsonRPCProvider);
+const getAiswapContractAddressByChainId = () => {
+    return new ethers.Contract(AISWAP_ADDRESS, AISwapABI, web3SockerProvider);
+}
 
-    const contract = new ethers.Contract(AISWAP_ADDRESS, AISwapABI, web3SockerProvider);
+const getChainJsonRpcProvider = (chainID: number) => {
+    switch (chainID) {
+        case 42161:
+            return arbitrumJSONRPCProvider;
+        case 100:
+            return gnosisJSONRPCProvider;
+        case 59144:
+            return lineaJSONRPCProvider;
+        default:
+            throw new Error("Invalid Chain ID")
+    }
+}
+
+const main = async () => {
+    const contract = getAiswapContractAddressByChainId();
+
+    if (!contract) {
+        throw new Error("Contract is not set")
+    }
 
     // @dev event triggered when an auction is created
     const eventFilter = {
@@ -83,43 +120,35 @@ const main = async () => {
         const destinationChain = decodedData?.args[8]
         console.log('Destination Chain:', destinationChain);
 
-        const tx = await (contract.connect(userSigner) as any).claimAuction(auctionId);
+        const userSignerForSourceChain = getUserSigner(getChainJsonRpcProvider(Number(sourceChain)));
 
-        console.log('Transaction:', tx);
+        const tx = await (contract.connect(userSignerForSourceChain) as any).claimAuction(auctionId);
+
+        console.log('Transaction in source chain to claim:', tx);
 
         await tx.wait();
 
         console.log('Order Claimed!');
 
-        // obtener destination blockchain
-
+        console.log("About to transfer funds to destination chain...")
         // hacer transaccion que envie la output amount a la direccion de la otra blockchain
-        const destinationChainContract = new ethers.Contract(tokenOutputAddress, ERC20ABI, destinationChainJsonRpcProvider);
+        const userSignerForDestinationChain = getUserSigner(getChainJsonRpcProvider(Number(destinationChain)));
+        const destinationChainContract = new ethers.Contract(tokenOutputAddress, ERC20ABI, userSignerForDestinationChain);
 
-        const destinationChainUserSigner = getUserSigner(destinationChainJsonRpcProvider);
-
-        const destinationChainContractWithSigner = destinationChainContract.connect(destinationChainUserSigner);
+        const destinationChainContractWithSigner = destinationChainContract.connect(userSignerForDestinationChain);
 
         const tx2 = await (destinationChainContractWithSigner as any).transfer(owner, minimumTokenOutputAmount);
 
         console.log('Transaction 2:', tx2);
 
         await tx2.wait();
+
+        console.log('Funds transferred to user in destination chain!');
     });
 
     // const address = await userSigner.getAddress();
 
     console.log("Listening for auction created events...")
-}
-
-const claim = async (auctionId: any) => {
-
-}
-
-const settle = async (auctionId: any) => {
-}
-
-const transfer = async (auctionId: any) => {
 }
 
 main().catch((error) => {
