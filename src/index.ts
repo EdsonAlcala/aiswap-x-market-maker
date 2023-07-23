@@ -81,6 +81,19 @@ const getChainJsonRpcProvider = (chainID: number) => {
     }
 }
 
+const getChainName = (chainID: number) => {
+    switch (chainID) {
+        case 42161:
+            return "Arbitrum";
+        case 100:
+            return "Gnosis";
+        case 59144:
+            return "Linea";
+        default:
+            throw new Error("Invalid Chain ID")
+    }
+}
+
 const main = async () => {
     const contract = getAiswapContractAddressByChainId();
 
@@ -147,7 +160,7 @@ const main = async () => {
         console.log('Funds transferred to user in destination chain!');
     });
 
-    console.log("Listening for auction created events...")
+    console.log(`Listening for auction created events for ${getChainName(Number(CHAIN_ID))}...`)
 }
 
 main().catch((error) => {
