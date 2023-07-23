@@ -131,7 +131,8 @@ const main = async () => {
         console.log('Order Claimed!');
 
         console.log("About to transfer funds to destination chain...")
-        // hacer transaccion que envie la output amount a la direccion de la otra blockchain
+
+        // Sending funds to destination chain
         const userSignerForDestinationChain = getUserSigner(getChainJsonRpcProvider(Number(destinationChain)));
         const destinationChainContract = new ethers.Contract(tokenOutputAddress, ERC20ABI, userSignerForDestinationChain);
 
@@ -145,8 +146,6 @@ const main = async () => {
 
         console.log('Funds transferred to user in destination chain!');
     });
-
-    // const address = await userSigner.getAddress();
 
     console.log("Listening for auction created events...")
 }
