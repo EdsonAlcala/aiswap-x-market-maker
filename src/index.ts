@@ -3,6 +3,7 @@ require('dotenv').config()
 import { ethers, NonceManager } from 'ethers';
 import AISwapABI from './abis/AISwap.json';
 import ERC20ABI from './abis/ERC20.json';
+import DataAsserterABI from './abis/DataAsserter.json';
 
 // @dev We only need 1 websocket and the rest are JSON RPCs to trigger txs
 
@@ -143,6 +144,9 @@ const main = async () => {
         const auctionId = decodedData?.args[0]
         console.log('Auction ID:', auctionId);
 
+        const tokenInputAddress = decodedData?.args[1]
+        console.log('Token Input Address:', tokenInputAddress);
+
         const tokenOutputAddress = decodedData?.args[2]
         console.log('Token Output Address:', tokenOutputAddress);
 
@@ -183,6 +187,15 @@ const main = async () => {
         await tx2.wait();
 
         console.log('Funds transferred to user in destination chain!');
+
+        // Register with UMA 
+
+        const dataId = ethers.keccak256(auctionId);
+        const dataAsserterInstance = new ethers.Contract(process.env.DATA_ASSERTER_ADDRESS || "", DataAsserterABI, userSignerForSourceChain);
+
+        const tx3 = await (dataAsserterInstance as any).assertDataFor(dataId, tx2, ethers.ZeroAddress);
+
+        await tx3.wait();
     });
 
     console.log(`Listening for auction created events for ${getChainName(Number(CHAIN_ID))}...`)
