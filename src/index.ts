@@ -5,6 +5,7 @@ import AISwapABI from './abis/AISwap.json';
 import ERC20ABI from './abis/ERC20.json';
 
 // @dev We only need 1 websocket and the rest are JSON RPCs to trigger txs
+
 // COMMON
 const MNEMONIC = process.env.MNEMONIC || "";
 
@@ -39,6 +40,13 @@ if (!LINEA_JSON_RPC) {
     throw new Error("LINEA_JSON_RPC is not set")
 }
 
+// ARBITRUM GOERLI
+const ARBITRUM_GOERLI_JSON_RPC = process.env.ARBITRUM_GOERLI_JSON_RPC || "";
+
+if (!ARBITRUM_GOERLI_JSON_RPC) {
+    throw new Error("ARBITRUM_GOERLI_JSON_RPC is not set")
+}
+
 // WEBSOCKET
 const WEBSOCKET_FOR_NODE = process.env.WEBSOCKET_FOR_NODE || "";
 
@@ -55,6 +63,7 @@ if (!CHAIN_ID) {
 const arbitrumJSONRPCProvider = new ethers.JsonRpcProvider(ARBITRUM_JSON_RPC);
 const gnosisJSONRPCProvider = new ethers.JsonRpcProvider(GNOSIS_JSON_RPC);
 const lineaJSONRPCProvider = new ethers.JsonRpcProvider(LINEA_JSON_RPC);
+const arbitrumGoerliJSONRPCProvider = new ethers.JsonRpcProvider(ARBITRUM_GOERLI_JSON_RPC);
 
 const getUserSigner = (providerValue: any) => {
     const hdNode = ethers.HDNodeWallet.fromMnemonic(ethers.Mnemonic.fromPhrase(MNEMONIC || ""), `m/44'/60'/0'/0/0`);
@@ -76,6 +85,8 @@ const getChainJsonRpcProvider = (chainID: number) => {
             return gnosisJSONRPCProvider;
         case 59144:
             return lineaJSONRPCProvider;
+        case 421613:
+            return arbitrumGoerliJSONRPCProvider;
         default:
             throw new Error("Invalid Chain ID")
     }
@@ -89,6 +100,8 @@ const getChainName = (chainID: number) => {
             return "Gnosis";
         case 59144:
             return "Linea";
+        case 421613:
+            return "Arbitrum Goerli";
         default:
             throw new Error("Invalid Chain ID")
     }
