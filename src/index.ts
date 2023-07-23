@@ -47,6 +47,13 @@ if (!ARBITRUM_GOERLI_JSON_RPC) {
     throw new Error("ARBITRUM_GOERLI_JSON_RPC is not set")
 }
 
+// GOERLI
+const GOERLI_JSON_RPC = process.env.GOERLI_JSON_RPC || "";
+
+if (!GOERLI_JSON_RPC) {
+    throw new Error("GOERLI_JSON_RPC is not set")
+}
+
 // WEBSOCKET
 const WEBSOCKET_FOR_NODE = process.env.WEBSOCKET_FOR_NODE || "";
 
@@ -64,6 +71,7 @@ const arbitrumJSONRPCProvider = new ethers.JsonRpcProvider(ARBITRUM_JSON_RPC);
 const gnosisJSONRPCProvider = new ethers.JsonRpcProvider(GNOSIS_JSON_RPC);
 const lineaJSONRPCProvider = new ethers.JsonRpcProvider(LINEA_JSON_RPC);
 const arbitrumGoerliJSONRPCProvider = new ethers.JsonRpcProvider(ARBITRUM_GOERLI_JSON_RPC);
+const goerliJSONRPCProvider = new ethers.JsonRpcProvider(GOERLI_JSON_RPC);
 
 const getUserSigner = (providerValue: any) => {
     const hdNode = ethers.HDNodeWallet.fromMnemonic(ethers.Mnemonic.fromPhrase(MNEMONIC || ""), `m/44'/60'/0'/0/0`);
@@ -87,6 +95,8 @@ const getChainJsonRpcProvider = (chainID: number) => {
             return lineaJSONRPCProvider;
         case 421613:
             return arbitrumGoerliJSONRPCProvider;
+        case 5:
+            return goerliJSONRPCProvider;
         default:
             throw new Error("Invalid Chain ID")
     }
@@ -102,6 +112,8 @@ const getChainName = (chainID: number) => {
             return "Linea";
         case 421613:
             return "Arbitrum Goerli";
+        case 5:
+            return "Goerli";
         default:
             throw new Error("Invalid Chain ID")
     }
